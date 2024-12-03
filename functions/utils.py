@@ -18,7 +18,7 @@ def get_current_date_in_timezone(timezone_str, separator='/'):
     
     return formatted_date
 
-def orchestrator_post_request(request_url, request_body):
+def function_post_request(request_url, request_body):
     response = requests.post(url=request_url, json=request_body)
     print(response)
     print(response.text)

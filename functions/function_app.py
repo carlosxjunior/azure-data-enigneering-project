@@ -5,18 +5,34 @@ from main_functions import *
 from environment_variables import LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME
 
 app = func.FunctionApp()
-@app.route(route="sofascore-ingest-events", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
-@app.function_name(name="ingest-events")
-def http_trigger(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+
+@app.route(route="ingest-events-season", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+@app.function_name(name="ingest-events-season")
+def ingest_events_in_season(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
     function_name = context.function_name
     sport = req.get_json().get("sport")
     tournament = req.get_json().get("tournament")
-    logging.info(f"PYLOG: Executing http function to ingest events for {tournament}")
-    execute_with_notification(partial(ingest_events, sport, tournament), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
+    season = req.get_json().get("season")
+    logging.info(f"PYLOG: Executing http function to ingest events from {tournament} - {season}")
+    execute_with_notification(partial(fetch_and_upload_events, sport, tournament, season, 0), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
     return func.HttpResponse(
         f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone("America/Sao_Paulo")).strftime("%d/%m/%Y - %H:%M:%S")}",
         status_code=200
     )
+
+@app.route(route="ingest-latest-events", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
+@app.function_name(name="ingest-latest-events")
+def ingest_latest_events(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
+    function_name = context.function_name
+    sport = req.get_json().get("sport")
+    tournament = req.get_json().get("tournament")
+    logging.info(f"PYLOG: Executing http function to ingest the latest events from {tournament}")
+    execute_with_notification(partial(ingest_latest_events, sport, tournament), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
+    return func.HttpResponse(
+        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone("America/Sao_Paulo")).strftime("%d/%m/%Y - %H:%M:%S")}",
+        status_code=200
+    )
+
 
 @app.blob_trigger(
     arg_name="blob", 
@@ -37,9 +53,9 @@ def ingest_odds(blob: func.InputStream, context: func.Context):
 def main():
     request_bodies = load_request_body()
     for request_body in request_bodies:
-        request_url = f"https://{APP_NAME}.azurewebsites.net/api/sofascore-ingest-events"
+        request_url = f"https://{APP_NAME}.azurewebsites.net/api/sofascore-ingest-latest-events"
         # execute_with_notification(partial(requests.post, url=request_url, json=request_body), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, "main()")
-        execute_with_notification(partial(orchestrator_post_request, request_url="http://localhost:7071/api/sofascore-ingest-events", request_body=request_body), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, "main()")
+        execute_with_notification(partial(function_post_request, request_url="http://localhost:7071/api/sofascore-ingest-latest-events", request_body=request_body), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, "main()")
     return
 
 # Call main()
