@@ -22,7 +22,12 @@ def fetch_and_upload_events(sport, tournament, season, start_page):
     events_inserted = set()
     while True:
         print(f"Fetching data from the {tournament} {season} season, page {page}")
-        data_json = sofascore_api.get_tournament_events(sport, tournament, season, page)
+        try:
+            data_json = sofascore_api.get_tournament_events(sport, tournament, season, page)
+        except Exception as e:
+            if "403 Client Error: Forbidden for url" in str(e):
+            # This means we're blocked temporarily by Sofascore so there is no point trying to get more data
+                exit(1)
         events = data_json["events"]
         event_ids = {event["id"] for event in events}
         data_str = json.dumps(data_json)
@@ -62,7 +67,7 @@ def get_events_with_no_odds_ingested(sport: str, tournament: str, season: str) -
         return events_no_odds
     else:
         # Raise an exception in case no new events are dectected. This will go to the notification and I'll know how to handle this issue, that could be due to the tournament being stopped or just a normal day with no matches
-        # TO DO: find a way to define custom start and end time for tournaments so the ingestion will only run for a tournament in the specified time period
+        # TODO: find a way to define custom start and end time for tournaments so the ingestion will only run for a tournament in the specified time period
         raise RuntimeError("No new events were detected for {tournament} - {season}.")
 
 
@@ -71,7 +76,12 @@ def fetch_and_upload_odds(sport: str, tournament: str, season: str):
     events_no_odds = get_events_with_no_odds_ingested(sport_formatted, tournament_formatted, season_formatted)
     odds_inserted = set()
     for event_id in events_no_odds:
-        data_json = sofascore_api.get_event_odds(event_id)
+        try:
+            data_json = sofascore_api.get_event_odds(event_id)
+        except Exception as e:
+            if "403 Client Error: Forbidden for url" in str(e):
+            # This means we're blocked temporarily by Sofascore so there is no point trying to get more data
+                break
         data_str = json.dumps(data_json)
         upload_blob(blob_service_client, container_name="raw", blob_path=f"sofascore/{sport_formatted}/{tournament_formatted}/odds/{season_formatted}/{event_id}.json", data=data_str)
         odds_inserted.add(event_id)
