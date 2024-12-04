@@ -1,9 +1,6 @@
 parameters:
   pythonVersion: '3.11'
 
-pool:
-  vmImage: ubuntu-latest
-
 steps:
 - task: UsePythonVersion@0
   displayName: "Set Python version to ${{ parameters.pythonVersion }}"
