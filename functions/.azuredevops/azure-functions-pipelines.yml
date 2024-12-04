@@ -1,0 +1,62 @@
+trigger:
+  branches:
+    include:
+      - develop
+      - test
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  devAppName: 'Your-Dev-Function-App-Name'
+  testAppName: 'Your-Test-Function-App-Name'
+  prodAppName: 'Your-Prod-Function-App-Name'
+  azureServiceConnection: 'Your-Service-Connection-Name'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - template: azure-build.yml
+
+- stage: DeployDev
+  displayName: Deploy to development
+  dependsOn: Build
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
+  jobs:
+  - job: DeployDev
+    displayName: Deploy to development Function App
+    steps:
+    - template: azure-deploy.yml
+      parameters:
+        azureSubscription: $(azureServiceConnection)
+        appName: $(devAppName)
+
+- stage: DeployTest
+  displayName: Deploy to test
+  dependsOn: Build
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/test')
+  jobs:
+  - job: DeployTest
+    displayName: Deploy to test Function App
+    steps:
+    - template: azure-deploy.yml
+      parameters:
+        azureSubscription: $(azureServiceConnection)
+        appName: $(testAppName)
+
+- stage: DeployProd
+  displayName: Deploy to production
+  dependsOn: Build
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
+  jobs:
+  - job: DeployProd
+    displayName: Deploy to production Function App
+    steps:
+    - template: azure-deploy.yml
+      parameters:
+        azureSubscription: $(azureServiceConnection)
+        appName: $(prodAppName)
+
+
