@@ -4,17 +4,24 @@
 parameters:
 - name: azureSubscription
   type: string
+- name: environment
+  type: string
 - name: appName
   type: string
 - name: appType
   type: string
   default: 'functionAppLinux'
 
-- task: AzureFunctionApp@2
-  inputs:
-    connectedServiceNameARM: ${{ parameters.azureSubscription }}
-    appType: ${{ parameters.appType }}
-    appName: ${{ parameters.appName }}
-    package: '$(System.DefaultWorkingDirectory)/**/*.zip'
-    #runtimeStack: # 'DOTNET|6.0' | 'DOTNET-ISOLATED|6.0' | 'DOTNET-ISOLATED|7.0' | 'DOTNET-ISOLATED|8.0' | 'JAVA|8' | 'JAVA|11' | 'JAVA|17' | 'JAVA|21' | 'NODE|14' | 'NODE|16' | 'NODE|18' | 'NODE|20' | 'PYTHON|3.8' | 'PYTHON|3.9' | 'PYTHON|3.10' | 'PYTHON|3.11'. Optional. Use when appType = functionAppLinux && isFlexConsumption = false. Runtime stack. 
-    deploymentMethod: 'auto'
+jobs:
+- job: functionApp_${{ parameters.appName }}_${{ parameters.environment }}_build
+  displayName: Deploy Function App
+  steps:
+  - task: AzureFunctionApp@2
+    displayName: Deploy Azure Function App
+    inputs:
+      connectedServiceNameARM: ${{ parameters.azureSubscription }}
+      appType: ${{ parameters.appType }}
+      appName: ${{ parameters.appName }}
+      package: '$(System.DefaultWorkingDirectory)/**/*.zip'
+      deploymentMethod: 'auto'
+
