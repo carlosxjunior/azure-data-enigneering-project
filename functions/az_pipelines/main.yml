@@ -9,54 +9,61 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  devAppName: 'func-sofascore-dev-001'
-  testAppName: 'func-sofascore-test-001'
-  prodAppName: 'func-sofascore-prod-001'
   azureServiceConnection: 'Your-Service-Connection-Name'
+  appNameDev: 'func-sofascore-dev-001'
+  appNameTest: 'func-sofascore-test-001'
+  appNameProd: 'func-sofascore-prod-001'
+  appType: 'functionAppLinux'
+  pythonVersion: $(pythonVersion)
 
 stages:
-- stage: Build
-  displayName: Build stage
-  jobs:
-  - template: ../../cicd-pipeline/az_func_build.yml
 
-- stage: DeployDev
-  displayName: Deploy to development
-  dependsOn: Build
+# Build and deploy for the develop branch
+- stage: BuildAndDeployDev
+  displayName: Build and deploy Function App to development environment
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   jobs:
-  - job: DeployDev
-    displayName: Deploy to development Function App
-    steps:
-    - template: ../../cicd-pipeline/az_func_deploy.yml
-      parameters:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(devAppName)
+  - template: az_func_build.yml
+    parameters:
+      pythonVersion: $(pythonVersion)
+      appName: $(appNameDev)
+      environment: 'dev'
+  - template: az_func_deploy.yml
+    parameters:
+      azureSubscription: $(azureServiceConnection)
+      appName: $(appNameDev)
+      appType: $(appType)
 
-- stage: DeployTest
-  displayName: Deploy to test
-  dependsOn: Build
+# Build and deploy for the test branch
+- stage: BuildAndDeployTest
+  displayName: Build and deploy Function App to test environment
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/test')
   jobs:
-  - job: DeployTest
-    displayName: Deploy to test Function App
-    steps:
-    - template: ../../cicd-pipeline/az_func_deploy.yml
-      parameters:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(testAppName)
+  - template: az_func_build.yml
+    parameters:
+      pythonVersion: $(pythonVersion)
+      appName: $(appNameTest)
+      environment: 'test'
+  - template: az_func_deploy.yml
+    parameters:
+      azureSubscription: $(azureServiceConnection)
+      appName: $(appNameTest)
+      appType: $(appType)
 
-- stage: DeployProd
-  displayName: Deploy to production
-  dependsOn: Build
+# Build and deploy for the main branch
+- stage: BuildAndDeployProd
+  displayName: Build and Deploy to Production
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
   jobs:
-  - job: DeployProd
-    displayName: Deploy to production Function App
-    steps:
-    - template: ../../cicd-pipeline/az_func_deploy.yml
-      parameters:
-        azureSubscription: $(azureServiceConnection)
-        appName: $(prodAppName)
+  - template: az_func_build.yml
+    parameters:
+      pythonVersion: $(pythonVersion)
+      appName: $(appNameProd)
+      environment: 'prod'
+  - template: az_func_deploy.yml
+    parameters:
+      azureSubscription: $(azureServiceConnection)
+      appName: $(appNameProd)
+      appType: $(appType)
 
 
