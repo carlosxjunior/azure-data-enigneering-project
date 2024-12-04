@@ -9,16 +9,16 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-  devAppName: 'Your-Dev-Function-App-Name'
-  testAppName: 'Your-Test-Function-App-Name'
-  prodAppName: 'Your-Prod-Function-App-Name'
+  devAppName: 'func-sofascore-dev-001'
+  testAppName: 'func-sofascore-test-001'
+  prodAppName: 'func-sofascore-prod-001'
   azureServiceConnection: 'Your-Service-Connection-Name'
 
 stages:
 - stage: Build
   displayName: Build stage
   jobs:
-  - template: azure-build.yml
+  - template: cicd-pipeline/az_func_build.yml
 
 - stage: DeployDev
   displayName: Deploy to development
@@ -28,7 +28,7 @@ stages:
   - job: DeployDev
     displayName: Deploy to development Function App
     steps:
-    - template: azure-deploy.yml
+    - template: cicd-pipeline/az_func_deploy.yml
       parameters:
         azureSubscription: $(azureServiceConnection)
         appName: $(devAppName)
@@ -41,7 +41,7 @@ stages:
   - job: DeployTest
     displayName: Deploy to test Function App
     steps:
-    - template: azure-deploy.yml
+    - template: cicd-pipeline/az_func_deploy.yml
       parameters:
         azureSubscription: $(azureServiceConnection)
         appName: $(testAppName)
@@ -54,7 +54,7 @@ stages:
   - job: DeployProd
     displayName: Deploy to production Function App
     steps:
-    - template: azure-deploy.yml
+    - template: cicd-pipeline/az_func_deploy.yml
       parameters:
         azureSubscription: $(azureServiceConnection)
         appName: $(prodAppName)
