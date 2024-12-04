@@ -23,12 +23,12 @@ stages:
   displayName: Build and deploy Function App to development environment
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/develop')
   jobs:
-  - template: az_func_build.yml
+  - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
       pythonVersion: $(pythonVersion)
       appName: $(appNameDev)
       environment: 'dev'
-  - template: az_func_deploy.yml
+  - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
       appName: $(appNameDev)
@@ -39,12 +39,12 @@ stages:
   displayName: Build and deploy Function App to test environment
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/test')
   jobs:
-  - template: az_func_build.yml
+  - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
       pythonVersion: $(pythonVersion)
       appName: $(appNameTest)
       environment: 'test'
-  - template: az_func_deploy.yml
+  - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
       appName: $(appNameTest)
@@ -55,12 +55,12 @@ stages:
   displayName: Build and Deploy to Production
   condition: eq(variables['Build.SourceBranch'], 'refs/heads/main')
   jobs:
-  - template: az_func_build.yml
+  - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
       pythonVersion: $(pythonVersion)
       appName: $(appNameProd)
       environment: 'prod'
-  - template: az_func_deploy.yml
+  - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
       appName: $(appNameProd)
