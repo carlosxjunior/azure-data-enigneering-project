@@ -25,12 +25,13 @@ stages:
   jobs:
   - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
-      pythonVersion: $(pythonVersion)
-      appName: $(appNameDev)
       environment: 'dev'
+      appName: $(appNameDev)
+      pythonVersion: $(pythonVersion)
   - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
+      environment: 'dev'
       appName: $(appNameDev)
       appType: $(appType)
 
@@ -41,12 +42,13 @@ stages:
   jobs:
   - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
-      pythonVersion: $(pythonVersion)
-      appName: $(appNameTest)
       environment: 'test'
+      appName: $(appNameTest)
+      pythonVersion: $(pythonVersion)
   - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
+      environment: 'test'
       appName: $(appNameTest)
       appType: $(appType)
 
@@ -57,12 +59,13 @@ stages:
   jobs:
   - template: ../../cicd-pipeline/az_func_build.yml
     parameters:
-      pythonVersion: $(pythonVersion)
-      appName: $(appNameProd)
       environment: 'prod'
+      appName: $(appNameProd)
+      pythonVersion: $(pythonVersion) 
   - template: ../../cicd-pipeline/az_func_deploy.yml
     parameters:
       azureSubscription: $(azureServiceConnection)
+      environment: 'prod'
       appName: $(appNameProd)
       appType: $(appType)
 
