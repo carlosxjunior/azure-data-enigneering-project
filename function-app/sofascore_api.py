@@ -20,24 +20,21 @@ class SofascoreAPI:
     def fetch_data(self, url):
         """Generic method to fetch data from the API."""
         try:
+            logging.info(f"PYLOG: Running get request for url > {url}")
             response = requests.get(url, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as http_error:
-            logging.info("PYLOG: HTTP error in function fetch_data")
-            print(f"HTTP error occurred: {http_error}")
+            logging.info(f"PYLOG: HTTP error in function fetch_data\nError: {str(http_error)}")
             raise http_error
         except requests.exceptions.ConnectionError as connection_error:
-            logging.info("PYLOG: Connection error in function fetch_data")
-            print(f"Connection error occurred: {connection_error}")
+            logging.info(f"PYLOG: Connection error in function fetch_data\nError: {str(connection_error)}")
             raise connection_error
         except requests.exceptions.Timeout as timeout_error:
-            logging.info("PYLOG: Timeout error in function fetch_data")
-            print(f"Timeout occurred: {timeout_error}")
+            logging.info(f"PYLOG: Timeout error in function fetch_data\nError: {str(timeout_error)}")
             raise timeout_error
         except requests.exceptions.RequestException as request_error:
-            logging.info("PYLOG: Error in function fetch_data")
-            print(f"An error occurred: {request_error}")
+            logging.info(f"PYLOG: Error in function fetch_data\nError: {str(request_error)}")
             raise request_error
 
 
@@ -103,7 +100,7 @@ class SofascoreAPI:
         """
         unique_tournament_id, season_id = self.find_tournament_and_season(sport, tournament, season)
         if not unique_tournament_id or not season_id:
-            print("Invalid sport, tournament or season. Cannot fetch events.")
+            logging.info("PYLOG: Invalid sport, tournament or season. Cannot fetch events.")
             return None
         url = f"{self.API_BASE_URL}/unique-tournament/{unique_tournament_id}/season/{season_id}/events/last/{page}"
         return self.fetch_data(url)

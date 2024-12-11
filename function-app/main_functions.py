@@ -21,12 +21,13 @@ def fetch_and_upload_events(sport, tournament, season, start_page):
     page = start_page
     events_inserted = set()
     while True:
-        print(f"Fetching data from the {tournament} {season} season, page {page}")
+        logging.info(f"PYLOG: Fetching data from the {tournament} {season} season, page {page}")
         try:
             data_json = sofascore_api.get_tournament_events(sport, tournament, season, page)
         except Exception as e:
             if "403 Client Error: Forbidden for url" in str(e):
             # This means we're blocked temporarily by Sofascore so there is no point trying to get more data
+                logging.info("PYLOG: '403 Client Error: Forbidden for url' while calling Sofascore APIs. Stopping execution...")
                 exit(1)
         events = data_json["events"]
         event_ids = {event["id"] for event in events}
@@ -85,7 +86,7 @@ def fetch_and_upload_odds(sport: str, tournament: str, season: str):
         data_str = json.dumps(data_json)
         upload_blob(blob_service_client, container_name="raw", blob_path=f"sofascore/{sport_formatted}/{tournament_formatted}/odds/{season_formatted}/{event_id}.json", data=data_str)
         odds_inserted.add(event_id)
-        # time.sleep(random.uniform(2, 10))
+        time.sleep(random.uniform(0, 2))
     # Save ingested event ids in 'logs' container
     ingest_new_event_ids(sport, tournament, season, "odds", odds_inserted)
     return
@@ -138,8 +139,8 @@ def ingest_all_events(sport, tournament):
 def ingest_events(sport, tournament):
     blobs = list_blobs(blob_service_client, "raw", f"sofascore/{sport.lower()}/{tournament.lower()}/")
     if not blobs:
-        print(f"Ingesting all events for {tournament}")
+        logging.info(f"PYLOG: Ingesting all events for {tournament}")
         ingest_all_events(sport, tournament)
     else:
-        print(f"Ingesting latest events for {tournament}")
+        logging.info(f"PYLOG: Ingesting latest events for {tournament}")
         ingest_latest_events(sport, tournament)

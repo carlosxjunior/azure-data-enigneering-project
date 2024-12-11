@@ -81,12 +81,12 @@ def list_blobs(blob_service_client: BlobServiceClient, container_name: str = Non
         blob_list = container_client.list_blobs(name_starts_with=path)
         blobs = [blob.name for blob in blob_list]
         
-        print(f"Blobs in path '{path}': {blobs}")
+        logging.info(f"PYLOG: Found these blobs in path '{path}': {blobs}")
         return blobs
     
     except Exception as e:
         logging.info("PYLOG: Error in function list_blobs")
-        print(f"An error occurred: {e}")
+        logging.info(f"An error occurred: {e}")
         raise
 
 def read_blob(blob_service_client: BlobServiceClient, container_name: str, blob_name: str):
@@ -107,10 +107,10 @@ def read_blob(blob_service_client: BlobServiceClient, container_name: str, blob_
         blob_data = blob_client.download_blob().readall()
         blob_content = blob_data.decode('utf-8')  # Decode bytes to string
         
-        print(f"Successfully read blob: {blob_name}")
+        logging.info(f"PYLOG: Successfully read blob: {blob_name}")
         return blob_content
     except Exception as e:
-        print(f"Error trying to read blob {blob_name} from container {container_name}: {e}")
+        logging.info(f"PYLOG: Error trying to read blob {blob_name} from container {container_name}: {e}")
         raise
 
 def upload_blob(blob_service_client: BlobServiceClient, container_name: str, blob_path: str, data: bytes, overwrite: bool = True):
@@ -131,11 +131,10 @@ def upload_blob(blob_service_client: BlobServiceClient, container_name: str, blo
         
         # Upload the data
         blob_client.upload_blob(data, overwrite=overwrite)
-        print(f"Blob uploaded successfully to {blob_path}")
+        logging.info(f"PYLOG: Blob uploaded successfully to {blob_path}")
 
     except Exception as e:
-        logging.info("PYLOG: Error in function upload_blob")
-        print(f"An error occurred: {e}")
+        logging.info(f"PYLOG: Error in function upload_blob\n Error: {str(e)}")
         raise
 
     return
@@ -160,11 +159,10 @@ def logic_app_notificator(logic_app_url: str, chat_id: str, message: str) -> boo
         # Make the HTTP POST request to trigger the Logic App
         response = requests.post(logic_app_url, json=payload)
         response.raise_for_status()
-        print("Notification sent successfully through Logic Apps!")
+        logging.info("PYLOG: Notification sent successfully through Logic Apps!")
         return True
     except requests.exceptions.RequestException as e:
-        logging.info("PYLOG: Error in function logic_app_notificator")
-        print(f"Error occurred while calling the Logic App: {e}")
+        logging.info(f"PYLOG: Error in function logic_app_notificator\nError: {str(e)}")
         return False
     
     
@@ -229,9 +227,6 @@ def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, re
             )
         
         logic_app_notificator(logic_app_url, telegram_chat_id, message)
-
-        if not success:
-            raise error
         
         return
 
