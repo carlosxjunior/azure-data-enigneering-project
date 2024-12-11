@@ -74,7 +74,7 @@
                 {
                     "name": "Premier League",
                     "slug": "premier-league",
-                    "id": 61627,
+                    "id": 17,
                     "seasons": [
                         {
                             "value": "2024/2025",
@@ -126,7 +126,7 @@
                         },
                         {
                             "value": "2012/2013",
-                            "id": 4170
+                            "id": 4710
                         },
                         {
                             "value": "2011/2012",
