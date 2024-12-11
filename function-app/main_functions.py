@@ -28,7 +28,7 @@ def fetch_and_upload_events(sport, tournament, season, start_page):
             if "403 Client Error: Forbidden for url" in str(e):
             # This means we're blocked temporarily by Sofascore so there is no point trying to get more data
                 logging.info("PYLOG: '403 Client Error: Forbidden for url' while calling Sofascore APIs. Stopping execution...")
-                exit(1)
+                raise
         events = data_json["events"]
         event_ids = {event["id"] for event in events}
         data_str = json.dumps(data_json)
@@ -69,7 +69,7 @@ def get_events_with_no_odds_ingested(sport: str, tournament: str, season: str) -
     else:
         # Raise an exception in case no new events are dectected. This will go to the notification and I'll know how to handle this issue, that could be due to the tournament being stopped or just a normal day with no matches
         # TODO: find a way to define custom start and end time for tournaments so the ingestion will only run for a tournament in the specified time period
-        raise RuntimeError("No new events were detected for {tournament} - {season}.")
+        raise RuntimeError(f"No new events were detected for {tournament} - {season}.")
 
 
 def fetch_and_upload_odds(sport: str, tournament: str, season: str):

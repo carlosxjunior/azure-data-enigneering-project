@@ -6,6 +6,7 @@
 azure-storage-blob
 azure-functions
 azure-identity
+fake-useragent
 python-dotenv
 pytz
 

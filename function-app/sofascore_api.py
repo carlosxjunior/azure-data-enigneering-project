@@ -1,5 +1,6 @@
-import logging
+from fake_useragent import UserAgent
 import requests
+import logging
 import json
 
 class SofascoreAPI:
