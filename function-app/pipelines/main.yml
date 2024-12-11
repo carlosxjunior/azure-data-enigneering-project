@@ -1,0 +1,68 @@
+# Disable pr triggers
+pr: none
+
+trigger:
+  branches:
+    include:
+    - develop
+    - test
+    - main
+  paths:
+    include:
+    - "function-app/*"
+
+pool:
+  name: ubuntu-agent-pool
+
+variables:
+- group: ubuntu-agent-info
+
+stages:
+
+  - stage: StartVM
+    displayName: "Start self-hosted agent"
+    jobs:
+      - template: ../cicd-pipelines/jobs/start_agent.yml
+        parameters:
+          subscriptionId: $(subscriptionId)
+          rgName: $(rgName)
+          vmName: $(vmName)
+
+  - stage: Build
+    displayName: "Build Function App"
+    dependsOn: StartVM
+    jobs:
+      - template: ../cicd-pipelines/jobs/function_app_build.yml
+
+  - stage: Deploy
+    displayName: "Deploy Function App"
+    dependsOn: Build
+    jobs:
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
+        - template: ../cicd-pipelines/jobs/function_app_deploy.yml
+          parameters:
+            appName: func-sofascore-dev-001
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/test') }}:
+        - template: ../cicd-pipelines/jobs/function_app_deploy.yml
+          parameters:
+            appName: func-sofascore-test-001
+      - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
+        - template: ../cicd-pipelines/jobs/function_app_deploy.yml
+          parameters:
+            appName: func-sofascore-prod-001
+      - ${{ if not(or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.SourceBranch'], 'refs/heads/test'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
+        - job: Fallback
+          displayName: "Fallback job"
+          steps:
+            - script: echo "No deployment needed for this run as it was not triggered by a PR to either 'develop', 'test' or 'main' branch."
+
+  - stage: DeallocateVM
+    displayName: "Deallocate self-hosted agent"
+    jobs:
+      - template: ../cicd-pipelines/jobs/stop_agent.yml
+        parameters:
+          subscriptionId: $(subscriptionId)
+          rgName: $(rgName)
+          vmName: $(vmName)
+
+
