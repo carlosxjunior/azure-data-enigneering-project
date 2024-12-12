@@ -4,7 +4,7 @@ parameters:
   default: 'AzureSubscriptionServiceConnection'
 - name: appName
   type: string
-  default: 'func-azuredevops-test'
+  default: ''
 - name: appType
   type: string
   default: 'functionAppLinux'
