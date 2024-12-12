@@ -1,0 +1,49 @@
+parameters:
+- name: pythonVersion
+  type: string
+  default: '3.x'
+- name: artifactName
+  type: string
+  default: 'function-app-artifact'
+
+jobs:
+  - job: Build
+    displayName: "Build Function App"
+    steps:
+
+      - task: UsePythonVersion@0
+        displayName: "Set Python version to ${{ parameters.pythonVersion }}"
+        inputs:
+          versionSpec: '${{ parameters.pythonVersion }}'
+        enabled: false # disable this task as the agent already has python installed
+        
+      - bash: |
+          sudo apt-get update
+          sudo apt-get install -y python3-pip
+        displayName: "Install pip using package manager"
+
+      - bash: |
+          if [ -f extensions.csproj ]
+          then
+              dotnet build extensions.csproj --output ./bin
+          fi
+          pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
+        displayName: "Install dependencies"
+        workingDirectory: "$(Build.SourcesDirectory)/Function Apps/func-azuredevops-test"
+
+      - bash: |
+          sudo apt-get update
+          sudo apt-get install -y zip
+        displayName: "Install zip utility"
+
+      - task: ArchiveFiles@2
+        displayName: "Archive files (zip function files)"
+        inputs:
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/Function Apps/func-azuredevops-test"
+          includeRootFolder: false
+          archiveFile: "$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip"
+
+      - task: PublishBuildArtifacts@1
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip'
+          artifactName: ${{ parameters.artifactName }}

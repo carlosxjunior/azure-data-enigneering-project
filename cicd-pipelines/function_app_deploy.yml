@@ -1,0 +1,32 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: 'AzureSubscriptionServiceConnection'
+- name: appName
+  type: string
+  default: ''
+- name: appType
+  type: string
+  default: 'functionAppLinux'
+- name: downloadVersion
+  type: string
+  default: 'current'
+- name: artifactName
+  type: string
+  default: 'function-app-artifact'
+
+jobs:
+  - job: Deploy
+    displayName: "Deploy Function App > ${{ parameters.appName }}"
+    steps:
+
+    - download: ${{ parameters.downloadVersion }}
+      artifact: ${{ parameters.artifactName }}
+        
+    - task: AzureFunctionApp@2
+      displayName: Deploy Function App v2
+      inputs:
+        connectedServiceNameARM: ${{ parameters.azureSubscription }}
+        appType: ${{ parameters.appType }}
+        appName: ${{ parameters.appName }}
+        package: '$(Pipeline.Workspace)/${{ parameters.artifactName }}/build$(Build.BuildId).zip'

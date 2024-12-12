@@ -1,0 +1,46 @@
+parameters:
+- name: azureSubscription
+  type: string
+  default: 'AzureSubscriptionServiceConnection'
+- name: subscriptionId
+  type: string
+  default: ''
+- name: rgName
+  type: string
+  default: ''
+- name: vmName
+  type: string
+  default: ''
+- name: apiVersion
+  type: string
+  default: '2024-07-01'
+
+jobs:
+  - job: DeallocateVM
+    displayName: "Deallocate self-hosted agent"
+    pool: server
+    steps:
+
+      - task: InvokeRESTAPI@1
+        displayName: "Deallocate VM using REST API"
+        inputs:
+          connectionType: 'connectedServiceNameARM'
+          azureServiceConnection: ${{ parameters.azureSubscription }}
+          method: 'POST'
+          urlSuffix: /subscriptions/${{ parameters.subscriptionId }}/resourceGroups/${{ parameters.rgName }}/providers/Microsoft.Compute/virtualMachines/${{ parameters.vmName }}/deallocate?api-version=${{ parameters.apiVersion }}
+          waitForCompletion: 'false'
+
+      - task: Delay@1
+        displayName: "Wait for VM to stop"
+        inputs:
+          delayForMinutes: '1'
+
+      - task: InvokeRESTAPI@1
+        displayName: "Check VM is deallocated"
+        inputs:
+          connectionType: 'connectedServiceNameARM'
+          azureServiceConnection: ${{ parameters.azureSubscription }}
+          method: 'GET'
+          urlSuffix: /subscriptions/${{ parameters.subscriptionId }}/resourceGroups/${{ parameters.rgName }}/providers/Microsoft.Compute/virtualMachines/${{ parameters.vmName }}?$expand=InstanceView&api-version=${{ parameters.apiVersion }}
+          waitForCompletion: 'false'
+          successCriteria: eq(root['properties']['instanceView']['statuses'][1]['code'], 'PowerState/deallocated')
