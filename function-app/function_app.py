@@ -1,6 +1,7 @@
 import azure.functions as func
 from functools import partial
 import logging
+
 from main_functions import *
 from environment_variables import LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME
 
@@ -66,7 +67,7 @@ def main_ingest_odds(blob: func.InputStream, context: func.Context):
     return
 
 
-# Define main function
+'''# Define main function
 def main():
     request_bodies = load_request_body()
     for request_body in request_bodies:
@@ -77,4 +78,4 @@ def main():
 
 # Call main()
 if __name__=="__main__":
-    main()
+    main()'''
