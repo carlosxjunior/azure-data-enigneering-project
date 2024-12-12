@@ -8,21 +8,25 @@ class SofascoreAPI:
     BASE_URL = "https://www.sofascore.com"
     API_BASE_URL = "https://sofascore.com/api/v1"
 
-    def __init__(self, timeout=10):
+    def __init__(self):
         """
         Initializes SofascoreAPIs with sports and tournaments data.
         """
         # Initialize data with the provided data in file sofascore_sports.json
         with open("sofascore_sports.json", "r") as file:
             self.sofascore_sports = json.load(file)
-        self.timeout = timeout
+        
+        self.timeout = 10
 
     
     def fetch_data(self, url):
         """Generic method to fetch data from the API."""
         try:
             logging.info(f"PYLOG: Running get request for url > {url}")
-            response = requests.get(url, timeout=self.timeout)
+            # Randomize User-Agent headers to see if it avoids getting blocked
+            user_agent = UserAgent()
+            hdrs = {"User-Agent": user_agent.random}
+            response = requests.get(url, headers=hdrs, timeout=self.timeout)
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as http_error:
