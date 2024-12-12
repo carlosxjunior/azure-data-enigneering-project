@@ -22,7 +22,7 @@ stages:
   - stage: StartVM
     displayName: "Start self-hosted agent"
     jobs:
-      - template: ../../cicd-pipelines/jobs/start_agent.yml
+      - template: ../../../cicd-pipelines/jobs/start_agent.yml
         parameters:
           subscriptionId: $(subscriptionId)
           rgName: $(rgName)
@@ -32,22 +32,22 @@ stages:
     displayName: "Build Function App"
     dependsOn: StartVM
     jobs:
-      - template: ../../cicd-pipelines/jobs/function_app_build.yml
+      - template: ../../../cicd-pipelines/jobs/function_app_build.yml
 
   - stage: Deploy
     displayName: "Deploy Function App"
     dependsOn: Build
     jobs:
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/develop') }}:
-        - template: ../cicd-pipelines/jobs/function_app_deploy.yml
+        - template: ../../cicd-pipelines/jobs/function_app_deploy.yml
           parameters:
             appName: func-sofascore-dev-001
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/test') }}:
-        - template: ../../cicd-pipelines/jobs/function_app_deploy.yml
+        - template: ../../../cicd-pipelines/jobs/function_app_deploy.yml
           parameters:
             appName: func-sofascore-test-001
       - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
-        - template: ../../cicd-pipelines/jobs/function_app_deploy.yml
+        - template: ../../../cicd-pipelines/jobs/function_app_deploy.yml
           parameters:
             appName: func-sofascore-prod-001
       - ${{ if not(or(eq(variables['Build.SourceBranch'], 'refs/heads/develop'), eq(variables['Build.SourceBranch'], 'refs/heads/test'), eq(variables['Build.SourceBranch'], 'refs/heads/main'))) }}:
@@ -59,7 +59,7 @@ stages:
   - stage: DeallocateVM
     displayName: "Deallocate self-hosted agent"
     jobs:
-      - template: ../../cicd-pipelines/jobs/stop_agent.yml
+      - template: ../../../cicd-pipelines/jobs/stop_agent.yml
         parameters:
           subscriptionId: $(subscriptionId)
           rgName: $(rgName)
