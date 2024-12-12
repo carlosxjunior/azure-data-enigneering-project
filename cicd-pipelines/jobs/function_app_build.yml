@@ -29,7 +29,7 @@ jobs:
           fi
           pip install --target="./.python_packages/lib/site-packages" -r ./requirements.txt
         displayName: "Install dependencies"
-        workingDirectory: "$(Build.SourcesDirectory)/Function Apps/func-azuredevops-test"
+        workingDirectory: "$(Build.SourcesDirectory)/function-app"
 
       - bash: |
           sudo apt-get update
@@ -39,7 +39,7 @@ jobs:
       - task: ArchiveFiles@2
         displayName: "Archive files (zip function files)"
         inputs:
-          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/Function Apps/func-azuredevops-test"
+          rootFolderOrFile: "$(System.DefaultWorkingDirectory)/function-app"
           includeRootFolder: false
           archiveFile: "$(Build.ArtifactStagingDirectory)/build$(Build.BuildId).zip"
 
