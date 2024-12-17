@@ -1,5 +1,6 @@
 {
   "version": "2.0",
+  "functions": ["ingest-events-season", "ingest-latest-events", "ingest-odds-events"],
   "functionTimeout": "00:10:00",
   "logging": {
     "applicationInsights": {
