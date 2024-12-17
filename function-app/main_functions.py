@@ -117,7 +117,7 @@ def ingest_latest_events(sport, tournament):
     Ingest data from the latest events for a specific tournament into Azure Blob Storage. But first, get data from Blob Storage to check what events need to be collected and ingested.
     """
     latest_season = sofascore_api.get_latest_season(sport, tournament)
-    blobs = list_blobs(blob_service_client, "raw", f"sofascore/{sport.lower()}/{tournament.replace(" ", "_").lower()}/events/{latest_season.replace("/", "-")}/")
+    blobs = list_blobs(blob_service_client, "raw", f"sofascore/{sport.lower()}/{tournament.replace(' ', '_').lower()}/events/{latest_season.replace('/', '-')}/")
     if not blobs:
         latest_page = 0
     else: 

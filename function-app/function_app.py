@@ -17,7 +17,7 @@ def main_ingest_events_season(req: func.HttpRequest, context: func.Context) -> f
     logging.info(f"PYLOG: Executing http function to ingest events from {tournament} - {season}")
     execute_with_notification(partial(fetch_and_upload_events, sport, tournament, season, 0), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
     return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone("America/Sao_Paulo")).strftime("%d/%m/%Y - %H:%M:%S")}",
+        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
         status_code=200
     )
 
@@ -31,7 +31,7 @@ def main_ingest_latest_events(req: func.HttpRequest, context: func.Context) -> f
     logging.info(f"PYLOG: Executing http function to ingest the latest events from {tournament}")
     execute_with_notification(partial(ingest_latest_events, sport, tournament), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
     return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone("America/Sao_Paulo")).strftime("%d/%m/%Y - %H:%M:%S")}",
+        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
         status_code=200
     )
 
@@ -46,7 +46,7 @@ def main_ingest_odds(req: func.HttpRequest, context: func.Context) -> func.HttpR
     logging.info(f"PYLOG: Executing http trigger function to ingest odds for {tournament} - {season}")
     execute_with_notification(partial(fetch_and_upload_odds, sport, tournament, season), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
     return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone("America/Sao_Paulo")).strftime("%d/%m/%Y - %H:%M:%S")}",
+        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
         status_code=200
     )
 
