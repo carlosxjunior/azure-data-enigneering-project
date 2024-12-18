@@ -15,6 +15,7 @@ jobs:
         displayName: "Set Python version to ${{ parameters.pythonVersion }}"
         inputs:
           versionSpec: '${{ parameters.pythonVersion }}'
+          disableDownloadFromRegistry: true
         
       - bash: |
           sudo apt-get update
