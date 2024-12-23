@@ -18,13 +18,6 @@ def get_current_date_in_timezone(timezone_str, separator='/'):
     
     return formatted_date
 
-def function_post_request(request_url, request_body):
-    response = requests.post(url=request_url, json=request_body)
-    print(response)
-    print(response.text)
-    return
-
-
 def load_request_body(file_path="tournaments_to_ingest.json"):
     with open(file_path, "r") as file:
         tournaments = json.load(file)
@@ -183,10 +176,11 @@ def notification_message(mode=0, **kwargs):
             "✅ JOB SUCCESS\n\n"
             "🏷️ Resource: {resource}\n"
             "🔎 Job name: {job_name}\n"
+            "📋 Job details: {job_details}\n"
             "🕑 Finished at: {finished_at}"
         ).format(**kwargs)
     
-def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, resource, job_name, notificate_success=False):
+def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, resource, job_name, job_details="No details for this job", notificate_success=False):
     """
     Executes a block of code with success and failure notifications.
     :param resource: The resource running the job.
@@ -212,7 +206,8 @@ def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, re
                 message = notification_message(
                     mode=1,
                     resource=resource,
-                    job_name=job_name, 
+                    job_name=job_name,
+                    job_details=job_details, 
                     finished_at=current_datetime
                 )
             else: 
@@ -229,8 +224,3 @@ def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, re
         logic_app_notificator(logic_app_url, telegram_chat_id, message)
         
         return
-
-
-
-
-

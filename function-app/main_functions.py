@@ -1,6 +1,4 @@
-import random
 import json
-import time
 import re
 
 from sofascore_api import SofascoreAPI
@@ -28,7 +26,7 @@ def fetch_and_upload_events(sport, tournament, season, start_page):
             if "403 Client Error: Forbidden for url" in str(e):
             # This means we're blocked temporarily by Sofascore so there is no point trying to get more data
                 logging.info("PYLOG: '403 Client Error: Forbidden for url' while calling Sofascore APIs. Stopping execution...")
-                raise
+            raise
         events = data_json["events"]
         event_ids = {event["id"] for event in events}
         data_str = json.dumps(data_json)
@@ -44,7 +42,6 @@ def fetch_and_upload_events(sport, tournament, season, start_page):
             break
         
         page += 1
-        # time.sleep(random.uniform(2, 10))
     
     # Save ingested event ids in 'logs' container
     ingest_new_event_ids(sport, tournament, season, "events", events_inserted)
@@ -83,11 +80,15 @@ def fetch_and_upload_odds(sport: str, tournament: str, season: str):
         try:
             data_json = sofascore_api.get_event_odds(event_id)
         except Exception as e:
-            raise
+            # Handle the case when the event is not found in Sofascore
+            if "404 Client Error: Not Found for url" in str(e):
+                pass
+                # TODO: add a way to report the missing event to the notification
+            else:
+                raise
         data_str = json.dumps(data_json)
         upload_blob(blob_service_client, container_name="raw", blob_path=f"sofascore/{sport_formatted}/{tournament_formatted}/odds/{season_formatted}/{event_id}.json", data=data_str)
         odds_inserted.add(event_id)
-        time.sleep(random.uniform(0, 0.95))
     # Save ingested event ids in 'logs' container
     ingest_new_event_ids(sport, tournament, season, "odds", odds_inserted)
     return

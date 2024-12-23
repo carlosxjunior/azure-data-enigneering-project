@@ -1,4 +1,3 @@
-from fake_useragent import UserAgent
 import requests
 import logging
 import json
@@ -23,10 +22,7 @@ class SofascoreAPI:
         """Generic method to fetch data from the API."""
         try:
             logging.info(f"PYLOG: Running get request for url > {url}")
-            # Randomize User-Agent headers to see if it avoids getting blocked
-            user_agent = UserAgent()
-            hdrs = {"User-Agent": user_agent.random}
-            response = requests.get(url, headers=hdrs, timeout=self.timeout)
+            response = requests.get(url, timeout=self.timeout)  
             response.raise_for_status()
             return response.json()
         except requests.exceptions.HTTPError as http_error:
