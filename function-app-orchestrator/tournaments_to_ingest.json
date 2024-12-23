@@ -1,0 +1,18 @@
+[
+    {
+        "sport": "Football",
+        "tournament": "Premier League"
+    },
+    {
+        "sport": "Football",
+        "tournament": "LaLiga"
+    },
+    {
+        "sport": "Football",
+        "tournament": "Serie A"
+    },
+    {
+        "sport": "Football",
+        "tournament": "Bundesliga"
+    }
+]

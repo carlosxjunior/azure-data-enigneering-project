@@ -16,7 +16,8 @@ jobs:
         inputs:
           versionSpec: '${{ parameters.pythonVersion }}'
           disableDownloadFromRegistry: true
-        
+        enabled: false
+
       - bash: |
           sudo apt-get update
           sudo apt-get install -y python3-pip
