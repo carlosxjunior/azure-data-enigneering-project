@@ -33,6 +33,8 @@ stages:
     dependsOn: StartVM
     jobs:
       - template: ../../cicd-pipelines/jobs/function_app_build.yml
+        parameters:
+          folderPath: 'function-app-orchestrator'
 
   - stage: Deploy
     displayName: "Deploy Function App"
