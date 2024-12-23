@@ -9,7 +9,7 @@ trigger:
     - main
   paths:
     include:
-    - "function-app/*"
+    - "function-app-orchestrator/*"
 
 pool:
   name: ubuntu-agent-pool
