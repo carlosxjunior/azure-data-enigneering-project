@@ -1,5 +1,6 @@
 from azure.identity import DefaultAzureCredential
 from azure.storage.blob import BlobServiceClient
+import azure.functions as func
 from datetime import datetime
 import requests
 import logging
@@ -19,7 +20,7 @@ def get_current_date_in_timezone(timezone_str: str, date_format: str = "%Y-%m-%d
     
     return formatted_date
 
-def http_response_template(func, status_code: int, response: str) -> func.HttpResponse:
+def http_response_template(func: func, status_code: int, response: str) -> func.HttpResponse:
     """
     Creates an HTTP response object with the provided status code and response.
     :param func: The `azure.functions` module, which contains the `HttpResponse` class.
