@@ -38,7 +38,7 @@ def notificator(logic_apps_url=LOGIC_APPS_URL, chat_id=TELEGRAM_CHAT_ID, message
 
 app = func.FunctionApp()
 
-@app.timer_trigger(schedule="0 0 5 * * *", arg_name="myTimer", run_on_startup=True)
+@app.timer_trigger(schedule="0 0 5 * * *", arg_name="myTimer", run_on_startup=False)
 @app.function_name("dailyIngestLatestEvents")
 def main(myTimer: func.TimerRequest) -> None:
     logging.info("PYLOG: Started main()")
