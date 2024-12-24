@@ -56,7 +56,8 @@ def main_ingest_odds(blob: func.InputStream, context: func.Context):
     blob_name = blob.name
     blob_parts = blob_name.split('/')
     sport, tournament, season = blob_parts[2], blob_parts[3], blob_parts[5]
-    function_name = context.function_name
     logging.info(f"PYLOG: Executing blob trigger function to ingest odds for {tournament} - {season}")
-    execute_with_notification(partial(fetch_and_upload_odds, sport, tournament, season), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, job_details=f"Triggered by blob:\n--- {blob_name} ---", notificate_success=True)
-    return
+    status_code, response = fetch_and_upload_odds(sport, tournament, season)
+    function_notificator(LOGIC_APPS_URL, TELEGRAM_CHAT_ID, status_code, f"{response}\n\nTriggered by blob:\n{blob_name}", APP_NAME, context.function_name, notificate_success=True)
+    
+    return http_response_template(func, status_code, response)
