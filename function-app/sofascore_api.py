@@ -102,7 +102,7 @@ class SofascoreAPI:
         unique_tournament_id, season_id = self.find_tournament_and_season(sport, tournament, season)
         if not unique_tournament_id or not season_id:
             logging.info("PYLOG: Invalid sport, tournament or season. Cannot fetch events.")
-            return None
+            raise ValueError("Invalid sport, tournament or season. Cannot fetch events.")
         url = f"{self.API_BASE_URL}/unique-tournament/{unique_tournament_id}/season/{season_id}/events/last/{page}"
         return self.fetch_data(url)
     
