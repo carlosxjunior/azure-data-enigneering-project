@@ -14,5 +14,9 @@
     {
         "sport": "Football",
         "tournament": "Bundesliga"
+    },
+    {
+        "sport": "Basketball",
+        "tournament": "NBA"
     }
 ]
