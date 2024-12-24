@@ -433,8 +433,8 @@
             "id": 2,
             "tournaments": [
                 {
-                    "name": "NBA_real",
-                    "slug": "nba-real",
+                    "name": "NBA",
+                    "slug": "nba",
                     "id": 132,
                     "seasons": [
                         {
@@ -500,21 +500,6 @@
                         {
                             "value": "2009/2010",
                             "id": 2342
-                        }
-                    ]
-                },
-                {
-                    "name": "NBA",
-                    "slug": "nba",
-                    "id": 132,
-                    "seasons": [
-                        {
-                            "value": "2024/2025",
-                            "id": 65360
-                        },
-                        {
-                            "value": "2023/2024",
-                            "id": 54105
                         }
                     ]
                 }
