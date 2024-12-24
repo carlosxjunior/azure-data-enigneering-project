@@ -194,7 +194,7 @@ def notification_message(mode: int = 0, **kwargs) -> str:
             "✅ JOB SUCCESS\n\n"
             "🏷️ Resource: {resource}\n"
             "🔎 Job name: {job_name}\n"
-            "📋 Job details: {job_details}\n"
+            "📋 Job details: {job_details}\n\n"
             "🕑 Finished at: {finished_at}"
         ).format(**kwargs)
 
