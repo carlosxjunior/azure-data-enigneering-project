@@ -11,17 +11,15 @@ app = func.FunctionApp()
 
 @app.route(route="ingest-events-season", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 @app.function_name(name="ingestEventsSeason")
-def main_ingest_events_season(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    function_name = context.function_name
+def main_ingest_events_season(req: func.HttpRequest, context: func.Context) -> func.HttpResponse: 
     sport = req.get_json().get("sport")
     tournament = req.get_json().get("tournament")
     season = req.get_json().get("season")
     logging.info(f"PYLOG: Executing http function to ingest events from {tournament} - {season}")
-    execute_with_notification(partial(fetch_and_upload_events, sport, tournament, season, 0), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
-    return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
-        status_code=200
-    )
+    status_code, response = fetch_and_upload_events(sport, tournament, season, 0)
+    function_notificator(LOGIC_APPS_URL, TELEGRAM_CHAT_ID, status_code, response, APP_NAME, context.function_name, notificate_success=True)
+
+    return http_response_template(func, status_code, response)   
 
 
 @app.route(route="ingest-odds-season", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
@@ -30,28 +28,23 @@ def main_ingest_odds(req: func.HttpRequest, context: func.Context) -> func.HttpR
     sport = req.get_json().get("sport")
     tournament = req.get_json().get("tournament")
     season = req.get_json().get("season")
-    function_name = context.function_name
     logging.info(f"PYLOG: Executing http trigger function to ingest odds for {tournament} - {season}")
-    execute_with_notification(partial(fetch_and_upload_odds, sport, tournament, season), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
-    return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
-        status_code=200
-    )
+    status_code, response = fetch_and_upload_odds(sport, tournament, season)
+    function_notificator(LOGIC_APPS_URL, TELEGRAM_CHAT_ID, status_code, response, APP_NAME, context.function_name, notificate_success=True)
+    
+    return http_response_template(func, status_code, response)
 
 
 @app.route(route="ingest-latest-events", methods=[func.HttpMethod.POST], auth_level=func.AuthLevel.FUNCTION)
 @app.function_name(name="ingestLatestEvents")
 def main_ingest_latest_events(req: func.HttpRequest, context: func.Context) -> func.HttpResponse:
-    function_name = context.function_name
     sport = req.get_json().get("sport")
     tournament = req.get_json().get("tournament")
     logging.info(f"PYLOG: Executing http function to ingest the latest events from {tournament}")
-    execute_with_notification(partial(ingest_latest_events, sport, tournament), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, notificate_success=True)
-    return func.HttpResponse(
-        f"Function {function_name} with body {req.get_json()}\nFinished at: {datetime.now(tz=pytz.timezone('America/Sao_Paulo')).strftime('%d/%m/%Y - %H:%M:%S')}",
-        status_code=200
-    )
+    status_code, response = ingest_latest_events(sport, tournament)
+    function_notificator(LOGIC_APPS_URL, TELEGRAM_CHAT_ID, status_code, response, APP_NAME, context.function_name, notificate_success=True)
 
+    return http_response_template(func, status_code, response)
 
 @app.blob_trigger(
     arg_name="blob", 
@@ -65,5 +58,5 @@ def main_ingest_odds(blob: func.InputStream, context: func.Context):
     sport, tournament, season = blob_parts[2], blob_parts[3], blob_parts[5]
     function_name = context.function_name
     logging.info(f"PYLOG: Executing blob trigger function to ingest odds for {tournament} - {season}")
-    execute_with_notification(partial(fetch_and_upload_odds, sport, tournament, season), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, job_details=f"Job triggered by blob > {blob_name}", notificate_success=True)
+    execute_with_notification(partial(fetch_and_upload_odds, sport, tournament, season), LOGIC_APPS_URL, TELEGRAM_CHAT_ID, APP_NAME, function_name, job_details=f"Triggered by blob:\n--- {blob_name} ---", notificate_success=True)
     return
