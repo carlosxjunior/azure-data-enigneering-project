@@ -6,27 +6,42 @@ import logging
 import json
 import pytz
 
-def get_current_date_in_timezone(timezone_str, separator='/'):
-    # Set the timezone based on the provided string
+def get_current_date_in_timezone(timezone_str: str, date_format: str = "%Y-%m-%d %H:%M:%S") -> str:
+    """
+    Get the current time in a specified format, for a given timezone.
+    :param timezone_str: Timezone value. For all possible values, refer to https://api-custom.eyesover.com/public/getZoneNames.
+    :param date_format: Format of the date to return. Default is "%Y-%m-%d %H:%M:%S".
+    :return: The current date in the specified timezone and format.
+    """
     tz = pytz.timezone(timezone_str)
-    
-    # Get the current time in the specified timezone
     current_datetime = datetime.now(tz)
-    
-    # Format the date as YYYY<separator>MM<separator>DD
-    formatted_date = current_datetime.strftime(f'%Y{separator}%m{separator}%d')
+    formatted_date = current_datetime.strftime(date_format)
     
     return formatted_date
 
-def load_request_body(file_path="tournaments_to_ingest.json"):
-    with open(file_path, "r") as file:
-        tournaments = json.load(file)
-    return tournaments
+def http_response_template(func, status_code: int, response: str) -> func.HttpResponse:
+    """
+    Creates an HTTP response object with the provided status code and response.
+    :param func: The `azure.functions` module, which contains the `HttpResponse` class.
+    :param status_code: The status code to return in the response.
+    :parm response: The response body to return.
+    :return: func.HttpResponse object.
+    """
+    if status_code == 200:
+        return func.HttpResponse(
+                str(response),
+                status_code=200
+            )
+    else:
+        return func.HttpResponse(
+                str(response),
+                status_code=500
+            )
 
-def find_item_in_array_of_objects(array_of_objects, key, value, item_name):
+
+def find_item_in_array_of_objects(array_of_objects: list[dict], key: str, value: str, item_name: str) -> dict:
     """
     Searches for an item in a list of dictionaries where a specific key matches a given value.
-
     :param array_of_objects: The list of dictionaries to search in.
     :param key: The key to check.
     :param value: The value to match.
@@ -39,10 +54,9 @@ def find_item_in_array_of_objects(array_of_objects, key, value, item_name):
     return item
 
 
-def create_blob_service_client(connection_string: str = None, account_url: str = None):
+def create_blob_service_client(connection_string: str = None, account_url: str = None) -> BlobServiceClient: 
     """
     Returns a BlobServiceClient based on the provided connection method.
-    
     :param connection_string: Connection string for the storage account.
     :param account_url: URL of the storage account for managed identity authentication.
     :return: BlobServiceClient instance.
@@ -56,10 +70,9 @@ def create_blob_service_client(connection_string: str = None, account_url: str =
         raise ValueError("Either a connection string or an account URL must be provided.")
     
 
-def list_blobs(blob_service_client: BlobServiceClient, container_name: str = None, path: str = ""):
+def list_blobs(blob_service_client: BlobServiceClient, container_name: str = None, path: str = "")  -> list[str]:
     """
     Lists all blobs in a specific path within a container with flexible authentication.
-    
     :param connection_string: Azure Storage account connection string.
     :param account_url: Azure Storage account URL for managed identity authentication.
     :param container_name: Name of the container in the data lake.
@@ -82,10 +95,9 @@ def list_blobs(blob_service_client: BlobServiceClient, container_name: str = Non
         logging.info(f"An error occurred: {e}")
         raise
 
-def read_blob(blob_service_client: BlobServiceClient, container_name: str, blob_name: str):
+def read_blob(blob_service_client: BlobServiceClient, container_name: str, blob_name: str) -> str:
     """
     Reads the content of a blob from Azure Blob Storage.
-
     :param container_name (str): The name of the container containing the blob.
     :param blob_name (str): The name of the blob to read.
     :return str: The content of the blob as a string.
@@ -106,15 +118,15 @@ def read_blob(blob_service_client: BlobServiceClient, container_name: str, blob_
         logging.info(f"PYLOG: Error trying to read blob {blob_name} from container {container_name}: {e}")
         raise
 
-def upload_blob(blob_service_client: BlobServiceClient, container_name: str, blob_path: str, data: bytes, overwrite: bool = True):
+def upload_blob(blob_service_client: BlobServiceClient, container_name: str, blob_path: str, data: bytes, overwrite: bool = True) -> None:
     """
-    Uploads data to Azure Data Lake as a blob with flexible authentication.
-    
-    :param connection_string: Azure Storage account connection string.
-    :param account_url: Azure Storage account URL for managed identity authentication.
+    Uploads data to Azure Data Lake as a blob.
+    :param blob_service_client: The BlobServiceClient to perform the desired operation.
     :param container_name: Name of the container in the data lake.
     :param blob_path: Path of the blob within the container.
     :param data: Data to upload (bytes).
+    :param overwrite: Whether to overwrite the blob if it already exists (default is True).
+    :return: None
     """
     try:
         # Get the container client
@@ -136,7 +148,6 @@ def upload_blob(blob_service_client: BlobServiceClient, container_name: str, blo
 def logic_app_notificator(logic_app_url: str, chat_id: str, message: str) -> bool:
     """
     Sends a notification to a Logic App that handles Telegram messaging.
-
     :param logic_app_url: The HTTP endpoint of the Logic App.
     :param chat_id: The chat ID to send the message to.
     :param message: The message text to be sent.
@@ -159,7 +170,13 @@ def logic_app_notificator(logic_app_url: str, chat_id: str, message: str) -> boo
         return False
     
     
-def notification_message(mode=0, **kwargs):
+def notification_message(mode: int = 0, **kwargs) -> str:
+    """
+    Returns a notification message for success or failure of a job.
+    :param mode: The mode of the message (0 for failure, 1 for success).
+    :param kwargs: The keyword arguments to be formatted into the message.
+    :return: The formatted notification message.
+    """
     if mode == 0:
         return("❌ JOB FAILURE ALERT \n\n"
             "🏷️ Resource: {resource}\n"
@@ -179,7 +196,59 @@ def notification_message(mode=0, **kwargs):
             "📋 Job details: {job_details}\n"
             "🕑 Finished at: {finished_at}"
         ).format(**kwargs)
-    
+
+
+def build_notification_message(status_code: int, response: str, resource: str, job_name: str, notificate_success: bool) -> str:
+    """
+    Builds a notification message based on the status code and response of a job.
+    :param status_code: The status code of the job execution.
+    :param response: The response message from the job.
+    :param resource: The resource running the job.
+    :param job_name: The name of the job or, in this case, of the function.
+    :param notificate_success: Whether to send a notification for successful jobs.
+    :return: The formatted notification message.
+    """
+    current_datetime = get_current_date_in_timezone("America/Sao_Paulo", "%d/%m/%Y - %H:%M:%S")
+    if status_code == 200:
+        if notificate_success:
+            message = notification_message(
+                mode=1,
+                resource=resource,
+                job_name=job_name,
+                job_details=response, 
+                finished_at=current_datetime
+            )
+        else: 
+            return
+    else:
+        message = notification_message(
+            mode=0,
+            resource=resource,
+            job_name=job_name, 
+            finished_at=current_datetime, 
+            error_message = response
+        )
+    return message
+
+
+def function_notificator(logic_app_url: str, telegram_chat_id: str, status_code: int, response: str, resource: str, job_name: str, notificate_success: bool) -> None:
+    """
+    Gets a notification message based on the job status and sends it to a Logic Apps for Telegram notification.
+    :param logic_app_url: The URL for the Logic App.
+    :param telegram_chat_id: The Telegram chat ID for notifications.
+    :param status_code: The status code of the job execution.
+    :param response: The response message from the job.
+    :param resource: The resource running the job.
+    :param job_name: The name of the job or, in this case, of the function.
+    :param notificate_success: Whether to send a notification for successful jobs.
+    :return: None
+    """
+    message = build_notification_message(status_code, response, resource, job_name, notificate_success)
+    if message:    
+        logic_app_notificator(logic_app_url, telegram_chat_id, message)
+    return
+
+
 def execute_with_notification(code_callable, logic_app_url, telegram_chat_id, resource, job_name, job_details="No details for this job", notificate_success=False):
     """
     Executes a block of code with success and failure notifications.
